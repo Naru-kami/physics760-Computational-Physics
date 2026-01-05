@@ -1,0 +1,119 @@
+\documentclass[%
+ reprint,
+%superscriptaddress,
+%groupedaddress,
+%unsortedaddress,
+%runinaddress,
+%frontmatterverbose, 
+%preprint,
+%preprintnumbers,
+%nofootinbib,
+%nobibnotes,
+%bibnotes,
+ amsmath,amssymb,
+ aps,
+%pra,
+%prb,
+%rmp,
+%prstab,
+%prstper,
+%floatfix,
+]{revtex4-2}
+
+\usepackage{lipsum} % dummy text
+
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+% \usepackage{hyperref}% add hypertext capabilities
+\usepackage[mathlines]{lineno}% Enable numbering of text and display math
+%\linenumbers\relax % Commence numbering lines
+
+%\usepackage[showframe,%Uncomment any one of the following lines to test 
+%%scale=0.7, marginratio={1:1, 2:3}, ignoreall,% default settings
+%%text={7in,10in},centering,
+%%margin=1.5in,
+%%total={6.5in,8.75in}, top=1.2in, left=0.9in, includefoot,
+%%height=10in,a5paper,hmargin={3cm,0.8in},
+%]{geometry}
+
+\begin{document}
+
+\preprint{APS/123-QED}
+
+\title{
+  physics760 - Computational Physics:\\
+  The Kosterlitz-Thouless phase transition and the XY
+  model
+}
+
+
+\author{Cedric}
+  \affiliation{1234567}
+\author{Kevin Helders}
+  \affiliation{2993317}
+
+
+\date{\today}
+
+
+\begin{abstract}
+ABSTRACT HERE
+\begin{description}
+\item[Usage]
+Secondary publications and information retrieval purposes.
+\item[Structure]
+You may use the \texttt{description} environment to structure your abstract;
+use the optional argument of the \verb+\item+ command to give the category of each item. 
+\end{description}
+\end{abstract}
+
+\maketitle
+
+
+%------------------------------ Introduction ------------------------------
+\section{Introduction}
+\lipsum[1-2]
+
+%------------------------------ A -----------------------------------------
+\subsection{Section A}
+\lipsum[3]
+
+%------------------------------ B -----------------------------------------
+\subsection{Section B}
+\lipsum[4]
+
+%------------------------------ Theoretical Basis -------------------------
+\section{Theoretical Basis}
+\lipsum[5-6]
+
+%------------------------------ Methods -----------------------------------
+\section{Methods}
+\lipsum[7-8]
+
+%------------------------------ Results -----------------------------------
+\section{Results}
+\lipsum[9]\\
+\begin{figure}[htb]
+\includegraphics[width=.48\textwidth]{../figs/test.png}
+\caption{\label{fig:circle}Circle yep}
+\end{figure}
+\lipsum[10]
+
+%------------------------------ Discussion --------------------------------
+\section{Discussion}
+\lipsum[11]
+
+%------------------------------ Summary -----------------------------------
+\section{Summary}
+\lipsum[12]
+
+
+%------------------------------ Appendix ----------------------------------
+\appendix
+\section{Appendix}
+\lipsum[13]
+
+
+\bibliography{apssamp}% Produces the bibliography via BibTeX.
+\end{document}
