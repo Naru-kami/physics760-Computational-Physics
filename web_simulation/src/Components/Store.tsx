@@ -1,9 +1,10 @@
 import createFastContext from "./FastContext";
 
 export type StoreType = {
+  isDark: boolean,
   T: number,
   N: 32 | 64 | 128 | 256 | 512,
-  magnetization: {x: number[], y: number[], cumulative: number[], length: number[]},
+  magnetization: { x: number[], y: number[], cumulative: number[], length: number[] },
   data: Data,
 }
 
@@ -47,11 +48,12 @@ class Data {
     }
   }
 
-  play() {
+  play(cb?: () => void) {
     this.rAF = requestAnimationFrame(() => {
+      cb?.();
       this.step();
       this.render();
-      this.play();
+      this.play(cb);
     });
   }
 
@@ -100,6 +102,10 @@ class Data {
     }
   }
 
+  cluster() {
+
+  }
+
   step() {
     this.MCstep.call(this);
   }
@@ -130,11 +136,12 @@ class Data {
 }
 
 const Store: StoreType = {
+  isDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
   T: 1,
   N: 32,
   magnetization: {
-    x: [],
-    y: [],
+    x: [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2],
+    y: [1, 0.95, 0.9, 0.75, 0.6, 0.5, 0.4, 0.25, 0.1, 0.05, 0],
     cumulative: [],
     length: []
   },

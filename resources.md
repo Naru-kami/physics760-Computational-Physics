@@ -8,6 +8,10 @@
 - Ordering, metastability and phase transitions in two-dimensional system:
 
   https://www.physics.uci.edu/~taborek/publications/other/jcv6i7p1181.pdf
+
+- Introduction to Cluster Monte Carlo Algorithms
+
+  https://csml.northwestern.edu/resources/Reprints/lnp_color.pdf
 # Simulations
 - https://www.veritasium.com/simulation4
 - https://rajeshrinet.github.io/blog/2014/ising-model/

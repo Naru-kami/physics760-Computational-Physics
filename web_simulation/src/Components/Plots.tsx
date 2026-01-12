@@ -1,4 +1,6 @@
 import Plot from 'react-plotly.js';
+import { useStore } from './Store';
+import { useMemo } from 'react';
 
 const config = {
   responsive: true,
@@ -10,41 +12,45 @@ const config = {
   }
 } satisfies Partial<Plotly.Config>;
 
-const layout = {
-  xaxis: { title: { text: "k_B T / J" }, mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: "#FFF" },
-  yaxis: { title: { text: "" }, range: [0, 102], mirror: true, ticks: 'outside', tick0: 0, showline: true, showgrid: true, showticksuffix: 'all', ticksuffix: "%", zeroline: false, color: "#FFF", rangemode: 'nonnegative' },
+const getLayout = (title: string, isDark = true) => ({
+  xaxis: { title: { text: "$k_BT/J$" }, range: [-0.05, 2.05], mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#FFFC" : "#000C", gridcolor: "#8888" },
+  yaxis: { title: { text: "" }, range: [-0.05, 1.05], mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#FFFC" : "#000C", rangemode: 'nonnegative', gridcolor: "#8888" },
   margin: { l: 55, r: 25, b: 70, t: 50, pad: 4 },
   showlegend: false,
   hovermode: "x",
   dragmode: false,
-  hoverlabel: { bgcolor: "#181c2d" },
+  hoverlabel: { bgcolor: "#d1d5e6" },
   plot_bgcolor: "#AAA1",
   paper_bgcolor: "#AAA1",
   width: 650,
   height: 350,
-  title: {text: "Magnetization", font: {color: "#FFF"}}
-} satisfies Partial<Plotly.Layout>;
+  title: { text: title, font: { color: isDark ? "#FFFC" : "#000C" } },
+  modebar: { bgcolor: "#0000", color: isDark ? "#FFF6" : "#0006", activecolor: isDark ? "#FFFC" : "#000C" }
+} satisfies Partial<Plotly.Layout>);
 
 const traceconfig = {
   name: "",
-  mode: 'lines',
-  fill: 'tozeroy',
-  fillcolor: '#3472D540',
+  mode: "markers",
   line: {
-    color: '#3472D5',
-    width: 2
+    color: 'dodgerblue',
+    width: 4
   },
-  hovertemplate: "<b> %{y:.2f}% <br> %{x:.0f} <br>"
-} satisfies Partial<Plotly.Data>;
-
-const trace = {
-  x: [1, 2, 3],
-  y: [1, 4, 9],
-  ...traceconfig
+  hovertemplate: "(%{x:.2f}, %{y:.2f})"
 } satisfies Partial<Plotly.Data>;
 
 
-export default function Plots() {
+function Magnetizaion() {
+  const [isDark] = useStore(store => store.isDark);
+  const [magnetization] = useStore(store => store.magnetization)
+
+  const trace = useMemo(() => ({
+    x: magnetization.x,
+    y: magnetization.y,
+    ...traceconfig
+  } satisfies Partial<Plotly.Data>), [magnetization]);
+
+  const layout = useMemo(() => getLayout("Magnetizaion", isDark), [isDark]);
+
   return (
     // @ts-expect-error
     <Plot.default
@@ -53,5 +59,13 @@ export default function Plots() {
       layout={layout}
       className="plot"
     />
+  )
+}
+
+
+export default function Plots() {
+  return (<div>
+    <Magnetizaion />
+  </div>
   )
 }
