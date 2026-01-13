@@ -12,20 +12,20 @@ const config = {
   }
 } satisfies Partial<Plotly.Config>;
 
-const getLayout = (title: string, isDark = true) => ({
-  xaxis: { title: { text: "$k_BT/J$" }, range: [-0.05, 2.05], mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#FFFC" : "#000C", gridcolor: "#8888" },
-  yaxis: { title: { text: "" }, range: [-0.05, 1.05], mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#FFFC" : "#000C", rangemode: 'nonnegative', gridcolor: "#8888" },
-  margin: { l: 55, r: 25, b: 70, t: 50, pad: 4 },
+const getLayout = (title: string, ylabel = "", isDark = true) => ({
+  xaxis: { title: { text: "$k_BT/J$" }, range: [-0.05, 2.05], mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#d4d4d6" : "#323232", gridcolor: "#8888" },
+  yaxis: { title: { text: ylabel }, range: [-0.05, 1.05], mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#d4d4d6" : "#323232", rangemode: 'nonnegative', gridcolor: "#8888" },
+  margin: { l: 65, r: 25, b: 70, t: 50, pad: 4 },
   showlegend: false,
   hovermode: "x",
   dragmode: false,
   hoverlabel: { bgcolor: "#d1d5e6" },
-  plot_bgcolor: "#AAA1",
-  paper_bgcolor: "#AAA1",
+  plot_bgcolor: isDark ? "#2c2c34" : "#f9f9f9",
+  paper_bgcolor: isDark ? "#2c2c34" : "#f9f9f9",
   width: 650,
   height: 350,
-  title: { text: title, font: { color: isDark ? "#FFFC" : "#000C" } },
-  modebar: { bgcolor: "#0000", color: isDark ? "#FFF6" : "#0006", activecolor: isDark ? "#FFFC" : "#000C" }
+  title: { text: title, font: { color: isDark ? "#d4d4d6" : "#323232" } },
+  modebar: { bgcolor: "#0000", color: isDark ? "#FFF6" : "#0006", activecolor: isDark ? "#d4d4d6" : "#323232" }
 } satisfies Partial<Plotly.Layout>);
 
 const traceconfig = {
@@ -35,7 +35,7 @@ const traceconfig = {
     color: 'dodgerblue',
     width: 4
   },
-  hovertemplate: "(%{x:.2f}, %{y:.2f})"
+  hovertemplate: "(x: %{x:.2f}, y: %{y:.2f})"
 } satisfies Partial<Plotly.Data>;
 
 
@@ -49,7 +49,7 @@ function Magnetizaion() {
     ...traceconfig
   } satisfies Partial<Plotly.Data>), [magnetization]);
 
-  const layout = useMemo(() => getLayout("Magnetizaion", isDark), [isDark]);
+  const layout = useMemo(() => getLayout("Magnetization", "$\\langle M \\rangle/N$", isDark), [isDark]);
 
   return (
     // @ts-expect-error

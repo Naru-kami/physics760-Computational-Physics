@@ -95,10 +95,30 @@ function Sliders() {
 
 function Buttons() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [data] = useStore(store => store.data);
+  const [data, setStore] = useStore(store => store.data);
 
   const handlePlay = useCallback(() => {
-    isPlaying ? data.pause() : data.play();
+    isPlaying ? data.pause() : data.play(() => {
+      setStore(p => {
+        const m = p.data.magnetization();
+        const idx = Math.round(p.T / 0.01);
+
+        p.magnetization.x = [...p.magnetization.x];
+        p.magnetization.y = [...p.magnetization.y];
+
+        p.magnetization.cumulative[idx] = (p.magnetization.cumulative[idx] ?? 0) + m;
+        p.magnetization.length[idx] = (p.magnetization.length[idx] ?? 0) + 1;
+        p.magnetization.x[idx] = p.T;
+        p.magnetization.y[idx] = p.magnetization.cumulative[idx]! / p.magnetization.length[idx]!;
+
+        return {
+          ...p,
+          magnetization: {
+            ...p.magnetization,
+          }
+        };
+      })
+    });
     setIsPlaying(p => !p);
   }, [isPlaying]);
 
@@ -118,7 +138,7 @@ function Buttons() {
 
   return (
     <div className="input-buttons">
-      <button className={`btn ${isPlaying ? "stop" : "start"}`} onClick={handlePlay}>{isPlaying? "Stop" : "Start"}</button>
+      <button className={`btn ${isPlaying ? "stop" : "start"}`} onClick={handlePlay}>{isPlaying ? "Stop" : "Start"}</button>
       <button className="btn step" onClick={handleStep}>Step</button>
       <button className="btn reset" onClick={handleReset}>Reset</button>
     </div>
