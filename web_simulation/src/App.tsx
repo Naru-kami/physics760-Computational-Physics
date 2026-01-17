@@ -4,19 +4,22 @@ import Canvas from "./Components/Canvas";
 import Provider from "./Components/Store";
 import Plots from './Components/Plots';
 import ThemeProvider from './Components/ThemeProvider';
+import { StrictMode } from 'react';
 
 export default function App() {
   return (
-    <Provider>
-      <ThemeProvider>
-        <div className="app">
-          <div>
-            <Controls />
-            <Canvas />
+    <StrictMode>
+      <Provider>
+        <ThemeProvider>
+          <div className="app">
+            <div>
+              <Controls />
+              <Canvas />
+            </div>
+            <Plots />
           </div>
-          <Plots />
-        </div>
-      </ThemeProvider>
-    </Provider>
+        </ThemeProvider>
+      </Provider>
+    </StrictMode>
   )
 }

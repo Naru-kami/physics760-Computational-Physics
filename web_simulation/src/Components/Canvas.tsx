@@ -1,21 +1,29 @@
 import { useEffect, useRef } from "react"
 import { useStore } from "./Store";
+import type { DataMessage } from "./Worker";
 
 export default function Canvas() {
-  const [data] = useStore(store => store.data)
+  const [_, setStore] = useStore(store => store.worker)
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
 
-    const ctx = ref.current?.getContext("2d");
-    if (ctx) ctx.imageSmoothingEnabled = false;
+    setStore(p => {
+      if (!ref.current || p.worker) return p;
 
-    data.viewport = ref.current;
-    data.initializeData();
-    data.render();
+      const offscreen = ref.current.transferControlToOffscreen();
 
-    return () => { data.viewport = undefined }
+      p.worker = new Worker(new URL("./Worker.ts", import.meta.url), { type: "module" });
+      p.worker.postMessage([{
+        canvas: offscreen,
+        width: p.N,
+        height: p.N,
+      }] satisfies DataMessage, [offscreen]);
+
+      return { ...p }
+    })
+
   }, []);
 
   return (

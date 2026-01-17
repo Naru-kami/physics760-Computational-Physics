@@ -2,6 +2,7 @@ import { useCallback, useId, useState } from 'react'
 import { useStore } from './Store';
 import Colorwheel from './Colorwheel';
 import { InlineMath } from 'react-katex';
+import type { DataMessage } from './Worker';
 
 const sizes = {
   1: 32,
@@ -28,7 +29,11 @@ function Sliders() {
 
   const handleTcChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setStore(p => {
-      p.data.beta = 1 / Number(e.target.value);
+      p.worker?.postMessage([{
+        property: "beta",
+        value: 1 / Number(e.target.value),
+      }] satisfies DataMessage)
+
       return {
         ...p,
         T: Number(e.target.value)
@@ -41,9 +46,14 @@ function Sliders() {
       const val = Number(e.target.value);
       if (!(val in sizes)) return p;
 
-      p.data.resize(sizes[val as keyof typeof sizes]);
-      p.data.initializeData();
-      p.data.render();
+      p.worker?.postMessage([
+        {
+          method: "resize",
+          parameters: [sizes[val as keyof typeof sizes]]
+        },
+        { method: "initializeData" },
+        { method: "render" },
+      ] satisfies DataMessage)
 
       return {
         ...p,
@@ -95,46 +105,54 @@ function Sliders() {
 
 function Buttons() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [data, setStore] = useStore(store => store.data);
+  const [worker] = useStore(store => store.worker);
 
   const handlePlay = useCallback(() => {
-    isPlaying ? data.pause() : data.play(() => {
-      setStore(p => {
-        const m = p.data.magnetization();
-        const idx = Math.round(p.T / 0.01);
+    isPlaying ? worker?.postMessage([{
+      method: "pause",
+    }] satisfies DataMessage) : worker?.postMessage([{
+      method: "play",
+    }] satisfies DataMessage);
 
-        p.magnetization.x = [...p.magnetization.x];
-        p.magnetization.y = [...p.magnetization.y];
+    // setStore(p => {
+    //   const m = p.data.magnetization();
+    //   const idx = Math.round(p.T / 0.01);
 
-        p.magnetization.cumulative[idx] = (p.magnetization.cumulative[idx] ?? 0) + m;
-        p.magnetization.length[idx] = (p.magnetization.length[idx] ?? 0) + 1;
-        p.magnetization.x[idx] = p.T;
-        p.magnetization.y[idx] = p.magnetization.cumulative[idx]! / p.magnetization.length[idx]!;
+    //   p.magnetization.x = [...p.magnetization.x];
+    //   p.magnetization.y = [...p.magnetization.y];
 
-        return {
-          ...p,
-          magnetization: {
-            ...p.magnetization,
-          }
-        };
-      })
-    });
+    //   p.magnetization.cumulative[idx] = (p.magnetization.cumulative[idx] ?? 0) + m;
+    //   p.magnetization.length[idx] = (p.magnetization.length[idx] ?? 0) + 1;
+    //   p.magnetization.x[idx] = p.T;
+    //   p.magnetization.y[idx] = p.magnetization.cumulative[idx]! / p.magnetization.length[idx]!;
+
+    //   return {
+    //     ...p,
+    //     magnetization: {
+    //       ...p.magnetization,
+    //     }
+    //   };
+    // })
     setIsPlaying(p => !p);
-  }, [isPlaying]);
+  }, [worker, isPlaying]);
 
   const handleStep = useCallback(() => {
     setIsPlaying(false)
-    data.pause();
-    data.step();
-    data.render();
-  }, []);
+    worker?.postMessage([
+      { method: "pause" },
+      { method: "step" },
+      { method: "render" },
+    ] satisfies DataMessage);
+  }, [worker]);
 
   const handleReset = useCallback(() => {
     setIsPlaying(false);
-    data.pause();
-    data.initializeData();
-    data.render();
-  }, []);
+    worker?.postMessage([
+      { method: "pause" },
+      { method: "initializeData" },
+      { method: "render" },
+    ] satisfies DataMessage);
+  }, [worker]);
 
   return (
     <div className="input-buttons">
