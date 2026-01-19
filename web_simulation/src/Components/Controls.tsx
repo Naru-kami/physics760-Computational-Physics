@@ -1,4 +1,4 @@
-import { useCallback, useId, useRef, useState } from 'react'
+import { useCallback, useId, useState } from 'react'
 import { useStore } from './Store';
 import Colorwheel from './Colorwheel';
 import { InlineMath } from 'react-katex';
@@ -107,8 +107,6 @@ function Buttons() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [worker, setStore] = useStore(store => store.worker);
 
-  const timer = useRef<number>(null);
-
   const handlePlay = useCallback(() => {
     isPlaying ? worker?.postMessage([{
       method: "pause",
@@ -138,10 +136,7 @@ function Buttons() {
   }, [worker]);
 
   const handleSweep = useCallback(() => {
-    if (timer.current) {
-      clearInterval(timer.current);
-      timer.current = null;
-
+    if (isPlaying) {
       worker?.postMessage([{
         method: "pause",
       }] satisfies MessageToWorker)
@@ -151,38 +146,21 @@ function Buttons() {
 
       setStore(p => {
         p.worker?.postMessage([
-          {
-            property: "beta",
-            value: 1 / 2,
-          }, {
-            method: "play",
-          }
+          { method: "pause" },
+          { method: "sweep" }
         ] satisfies MessageToWorker)
 
         return { ...p, T: 2 }
       })
-
-      timer.current = setInterval(() => {
-        setStore(p => {
-          const T = Math.round(Math.max(0, Math.min(p.T - 0.01, 2)) * 100) / 100
-          p.worker?.postMessage([{
-            property: "beta",
-            value: 1 / T,
-          }] satisfies MessageToWorker)
-
-          return { ...p, T }
-        })
-      }, 15000);
-
     }
-  }, [worker]);
+  }, [worker, isPlaying]);
 
   return (
-    <div className="input-buttons">
+    <div className="btn-group">
       <button className={`btn ${isPlaying ? "stop" : "start"}`} onClick={handlePlay}>{isPlaying ? "Stop" : "Start"}</button>
+      <button className="btn step" onClick={handleSweep}>Sweep</button>
       <button className="btn step" onClick={handleStep}>Step</button>
       <button className="btn reset" onClick={handleReset}>Reset</button>
-      <button className="btn step" onClick={handleSweep}>Sweep</button>
     </div>
   )
 }

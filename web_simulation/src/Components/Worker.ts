@@ -139,21 +139,7 @@ class Data {
     this.#rAF = requestAnimationFrame((time) => {
       this.step();
       if (this.record) {
-        const M = this.magnetization();
-        const idx = Math.round(100 / this.beta);
-
-        this.#m[idx] = (this.#m[idx] ?? 0) + M;
-        this.#m2[idx] = (this.#m2[idx] ?? 0) + M * M;
-        this.#len[idx]++;
-        this.#chi[idx] = (this.#m2[idx] / this.#len[idx] - (this.#m[idx] / this.#len[idx]) ** 2) * this.beta;
-
-        if (time - this.#lastCalc > 500) {
-          this.#lastCalc = time;
-          self.postMessage?.({
-            magnetization: this.#m.map((e, i) => e && e / this.#len[i]),
-            susceptibility: this.#chi,
-          } satisfies MessageFromWorker)
-        }
+        this.recordData(time);
       }
       this.render();
       this.play();
@@ -168,6 +154,44 @@ class Data {
       magnetization: this.#m.map((e, i) => e && e / this.#len[i]),
       susceptibility: this.#chi,
     } satisfies MessageFromWorker)
+  }
+
+  sweep(beta = 2) {
+    if(!beta) {
+      self.postMessage?.({
+        magnetization: this.#m.map((e, i) => e && e / this.#len[i]),
+        susceptibility: this.#chi,
+      } satisfies MessageFromWorker)
+      
+      return
+    }
+    this.beta = beta;
+    this.#rAF = requestAnimationFrame(time => {
+      for(let i = 0; i < 15; i++) {
+        this.step()
+        this.recordData(time);
+      }
+      this.render();
+      this.sweep(beta - 0.01);
+    })
+  }
+
+  recordData(currentTime: number) {
+    const M = this.magnetization();
+    const idx = Math.round(100 / this.beta);
+
+    this.#m[idx] = (this.#m[idx] ?? 0) + M;
+    this.#m2[idx] = (this.#m2[idx] ?? 0) + M * M;
+    this.#len[idx]++;
+    this.#chi[idx] = (this.#m2[idx] / this.#len[idx] - (this.#m[idx] / this.#len[idx]) ** 2) * this.beta;
+
+    if (currentTime - this.#lastCalc > 500) {
+      this.#lastCalc = currentTime;
+      self.postMessage?.({
+        magnetization: this.#m.map((e, i) => e && e / this.#len[i]),
+        susceptibility: this.#chi,
+      } satisfies MessageFromWorker)
+    }
   }
 
   magnetization() {

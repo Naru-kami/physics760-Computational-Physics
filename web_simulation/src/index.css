@@ -42,10 +42,18 @@ body {
   align-content: end;
 }
 
-.input-buttons {
+.btn-group {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  border-radius: 4px;
+  overflow: clip;
+  align-self:center;
+  & > .btn {
+    border-radius: 0;
+    position: relative;
+  }
+  & > .btn:not(:first-child) {
+    border-left: 1px solid rgba(128, 128, 128, 0.5);
+  }
 }
 
 @property --opacity {
@@ -55,11 +63,10 @@ body {
 }
 
 .btn {
-  padding: 0.4lh 2ch;
+  padding: 0.4lh 1.75ch;
   text-align: center;
   border-radius: 4px;
-  border: 1px solid transparent;
-  background-color: transparent;
+  border: none;
   cursor: pointer;
   background-image: linear-gradient(oklch(100% 0 0 / var(--opacity)));
   transition: --opacity 150ms ease-out;
@@ -68,6 +75,9 @@ body {
   }
   &:active {
     --opacity: 0.2;
+  }
+  &:disabled {
+    opacity: 0.5;
   }
 }
 
@@ -82,7 +92,7 @@ body {
   transition-property: --opacity, background-color;
 }
 .btn.step {
-  border-color: #2780e6;
+  background-color: #8383837c;
 }
 .btn.reset {
   background-color: #982929;
