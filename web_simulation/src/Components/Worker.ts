@@ -89,7 +89,7 @@ class Data {
   // overwritables
   record: boolean;
   beta: number;
-  step: Data["Metropolis" | "SwendsenWang" | "Wolff"];
+  step: Data["Metropolis" | "Wolff"];
 
   constructor(viewport: OffscreenCanvas, width: number, height: number) {
     this.#viewport = viewport;
@@ -106,15 +106,23 @@ class Data {
     this.record = true;
     this.beta = 1;
     this.step = this.Metropolis;
+
+    const M = new DOMMatrix().translateSelf(256, 256).scaleSelf(512 / width, 512 / height);
+    const ctx = this.#viewport.getContext("2d");
+    ctx?.setTransform(M);
   }
 
-  setStep(method: "Metropolis" | "SwendsenWang" | "Wolff") {
+  setStep(method: "Metropolis" | "Wolff") {
     this.step = this[method];
   }
 
   resize(width: number, height: number) {
     this.#canvas.width = width;
     this.#canvas.height = height;
+
+    const M = new DOMMatrix().translateSelf(256, 256).scaleSelf(512 / width, 512 / height);
+    const ctx = this.#viewport.getContext("2d");
+    ctx?.setTransform(M);
 
     this.#pixelData = new ImageData(width, height);
 
@@ -247,10 +255,6 @@ class Data {
     }
   }
 
-  SwendsenWang() {
-
-  }
-
   Wolff() {
     const width = this.#pixelData.width;
     const height = this.#pixelData.height;
@@ -262,19 +266,17 @@ class Data {
     const stack = new Set<number>([py * width + px]);
     const cluster = new Set<number>();
 
-    let neighbors: number[], x: number, y: number;
+    let neighbors: number[] = [], x: number, y: number;
 
     for (const s of stack.values()) {
       this.#spins[s] = (2 * r - this.#spins[s] + 3 * Math.PI) % (2 * Math.PI);
       x = s % width;
       y = Math.floor(s / width);
 
-      neighbors = [
-        ((y - 1 + height) % height) * width + x,  // top
-        y * width + ((x + 1) % width),            // right
-        ((y + 1) % height) * width + x,           // bottom
-        y * width + ((x - 1 + width) % width),    // left
-      ]
+      neighbors[0] = ((y - 1 + height) % height) * width + x,  // top
+      neighbors[1] = y * width + ((x + 1) % width);            // right
+      neighbors[2] = ((y + 1) % height) * width + x;           // bottom
+      neighbors[3] = y * width + ((x - 1 + width) % width);    // left
 
       for (const neighbor of neighbors) {
         if (
@@ -286,8 +288,8 @@ class Data {
         }
       }
 
-      stack.delete(s)
       cluster.add(s);
+      stack.delete(s)
     }
   }
 
@@ -306,10 +308,8 @@ class Data {
       }
     }
     this.#canvas.getContext("2d")?.putImageData(this.#pixelData, 0, 0);
-
-    const M = new DOMMatrix().translateSelf(256, 256).scaleSelf(512 / width, 512 / height);
+    
     const ctx = this.#viewport.getContext("2d");
-    ctx?.setTransform(M);
     ctx?.drawImage(this.#canvas, -width / 2, -height / 2);
   }
 }

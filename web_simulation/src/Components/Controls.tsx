@@ -173,7 +173,7 @@ function MethodSelect() {
   const [method, setMethod] = useState<MCMethods>("Metropolis");
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    if ("Metropolis" === e.target.value || "SwendsenWang" === e.target.value || "Wolff" === e.target.value) {
+    if ("Metropolis" === e.target.value || "Wolff" === e.target.value) {
       setMethod(e.target.value);
       worker?.postMessage([{
         method: "setStep",
@@ -184,7 +184,6 @@ function MethodSelect() {
 
   return <select className="step-method" value={method} onChange={handleChange}>
     <option value="Metropolis">Metropolis Algorithm</option>
-    <option value="SwendsenWang">SwendsenWang Algorithm</option>
     <option value="Wolff">Wolff Algorithm</option>
   </select>
 }

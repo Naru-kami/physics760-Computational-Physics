@@ -130,6 +130,7 @@ canvas {
 
   & > .gradient-wheel {
     position: absolute;
+    z-index: -1;
     inset: 0;
     padding: 0.5rem;
     transform: scaleY(-1);
