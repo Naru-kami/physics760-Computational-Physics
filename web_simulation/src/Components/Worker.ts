@@ -78,6 +78,7 @@ class Data {
   #pixelData: ImageData;
   #rAF?: number;
   #lastCalc: number;
+  #palette: Uint8Array = new Uint8Array(4608); // 6 permutations for 3 8-bit color => 6 * 256 * 3 = 4608
 
   // Spin data
   #spins: Float64Array;
@@ -106,6 +107,8 @@ class Data {
     this.record = true;
     this.beta = 1;
     this.step = this.Metropolis;
+
+    this.#buildPalette();
 
     const M = new DOMMatrix().translateSelf(256, 256).scaleSelf(512 / width, 512 / height);
     const ctx = this.#viewport.getContext("2d");
@@ -147,6 +150,16 @@ class Data {
       magnetization: { y: this.#m },
       susceptibility: { y: this.#chi },
     } satisfies MessageFromWorker)
+  }
+
+  #buildPalette() {
+    for (let i = 0; i < 1536; i++) {
+      const h = (i + 0.5) / 1536 * 2 * Math.PI;
+      const [r, g, b] = hslToRgb(h);
+      this.#palette[i * 3 + 0] = Math.round(r * 255);
+      this.#palette[i * 3 + 1] = Math.round(g * 255);
+      this.#palette[i * 3 + 2] = Math.round(b * 255);
+    }
   }
 
   play() {
@@ -273,7 +286,7 @@ class Data {
       x = s % width;
       y = Math.floor(s / width);
 
-      neighbors[0] = ((y - 1 + height) % height) * width + x,  // top
+      neighbors[0] = ((y - 1 + height) % height) * width + x;  // top
       neighbors[1] = y * width + ((x + 1) % width);            // right
       neighbors[2] = ((y + 1) % height) * width + x;           // bottom
       neighbors[3] = y * width + ((x - 1 + width) % width);    // left
@@ -298,17 +311,19 @@ class Data {
 
     const width = this.#pixelData.width;
     const height = this.#pixelData.height;
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const [r, g, b] = hslToRgb(this.#spins[y * width + x])
-        this.#pixelData.data[(y * width + x) * 4 + 0] = r * 255;
-        this.#pixelData.data[(y * width + x) * 4 + 1] = g * 255;
-        this.#pixelData.data[(y * width + x) * 4 + 2] = b * 255;
-        this.#pixelData.data[(y * width + x) * 4 + 3] = 255;
-      }
+    const scale = 1536 / (2 * Math.PI);
+    let idx: number;
+
+    for (let i = 0; i < this.#spins.length; i++) {
+      idx = Math.floor(this.#spins[i] * scale) * 3;
+
+      this.#pixelData.data[i * 4 + 0] = this.#palette[idx + 0];
+      this.#pixelData.data[i * 4 + 1] = this.#palette[idx + 1];
+      this.#pixelData.data[i * 4 + 2] = this.#palette[idx + 2];
+      this.#pixelData.data[i * 4 + 3] = 255;
     }
     this.#canvas.getContext("2d")?.putImageData(this.#pixelData, 0, 0);
-    
+
     const ctx = this.#viewport.getContext("2d");
     ctx?.drawImage(this.#canvas, -width / 2, -height / 2);
   }
