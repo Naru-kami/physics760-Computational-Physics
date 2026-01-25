@@ -2,7 +2,7 @@ import React, { useCallback, useId, useState } from 'react'
 import { useStore } from './Store';
 import Colorwheel from './Colorwheel';
 import { InlineMath } from 'react-katex';
-import type { MessageToWorker } from './Worker';
+import type { MessageToWorker, StepMethods } from './Worker';
 
 const sizes = {
   1: 32,
@@ -12,7 +12,7 @@ const sizes = {
   5: 512,
 } as const;
 
-const keys = {
+const sizeKeys = {
   32: 1,
   64: 2,
   128: 3,
@@ -30,8 +30,8 @@ function Sliders() {
   const handleTcChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setStore(p => {
       p.worker?.postMessage([{
-        property: "beta",
-        value: 1 / Number(e.target.value),
+        property: "T",
+        value: Number(e.target.value),
       }] satisfies MessageToWorker)
 
       return {
@@ -71,7 +71,7 @@ function Sliders() {
       <input
         type="range"
         id={id2}
-        value={keys[N]}
+        value={sizeKeys[N]}
         onChange={handleNChange}
         min={1}
         max={5}
@@ -88,7 +88,7 @@ function Sliders() {
     </div>
     <div className="input-wrapper">
       <label htmlFor={id1}>
-        <InlineMath math="k_BT/J" />: {T}
+        <InlineMath math="T" />: {T}
       </label>
       <input
         type="range"
@@ -147,11 +147,12 @@ function Buttons() {
       setStore(p => {
         p.worker?.postMessage([
           { method: "pause" },
-          { method: "initializeData" },
+          { method: "initializeDataAligned" },
+          { property: "T", value: 0 },
           { method: "sweep" }
         ] satisfies MessageToWorker)
 
-        return { ...p, T: 2 }
+        return { ...p, T: 0 }
       })
     }
   }, [worker, isPlaying]);
@@ -166,13 +167,12 @@ function Buttons() {
   )
 }
 
-type MCMethods = "Metropolis" | "SwendsenWang" | "Wolff";
-
 function MethodSelect() {
   const [worker] = useStore(store => store.worker)
-  const [method, setMethod] = useState<MCMethods>("Metropolis");
+  const [obs_label, setStore] = useStore(store => store.obs_label);
+  const [method, setMethod] = useState<StepMethods>("Metropolis");
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleMethod = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     if ("Metropolis" === e.target.value || "Wolff" === e.target.value) {
       setMethod(e.target.value);
       worker?.postMessage([{
@@ -182,10 +182,28 @@ function MethodSelect() {
     }
   }, [worker]);
 
-  return <select className="step-method" value={method} onChange={handleChange}>
-    <option value="Metropolis">Metropolis Algorithm</option>
-    <option value="Wolff">Wolff Algorithm</option>
-  </select>
+  const handleObs = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+
+    if ("Magnetization" === value || "Energy" === value) {
+      setStore(p => ({ ...p, obs_label: value }));
+      worker?.postMessage([{
+        method: "setObs",
+        parameters: [value]
+      }] satisfies MessageToWorker)
+    }
+  }, [worker]);
+
+  return <div className="select-group">
+    <select value={method} onChange={handleMethod}>
+      <option value="Metropolis">Metropolis</option>
+      <option value="Wolff">Wolff</option>
+    </select>
+    <select value={obs_label} onChange={handleObs}>
+      <option value="Magnetization">Magnetization</option>
+      <option value="Energy">Energy</option>
+    </select>
+  </div>
 }
 
 export default function Controls() {

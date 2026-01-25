@@ -12,6 +12,10 @@
 - Introduction to Cluster Monte Carlo Algorithms
 
   https://csml.northwestern.edu/resources/Reprints/lnp_color.pdf
+
+- Lectures on Phase Transitions And The Renormalization Group (page 345-350):
+
+  https://students.iiserkol.ac.in/~mms15ms051/courses/PH4202/[Nigel%20Goldenfeld]%20Lectures%20on%20Phase%20Transitions%20and%20the%20Renormalization%20Group.pdf
 # Simulations
 - https://www.veritasium.com/simulation4
 - https://rajeshrinet.github.io/blog/2014/ising-model/

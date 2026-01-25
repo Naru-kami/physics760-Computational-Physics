@@ -25,8 +25,8 @@ export default function Canvas() {
         setStore(o => ({
           ...o,
           ...data,
-          magnetization: { ...o.magnetization, ...data.magnetization },
-          susceptibility: { ...o.susceptibility, ...data.susceptibility }
+          observable: { ...o.observable, ...data.observable },
+          variance: { ...o.variance, ...data.variance }
         }))
       }
 

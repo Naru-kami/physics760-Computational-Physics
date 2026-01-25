@@ -13,7 +13,7 @@ const config = {
 } satisfies Partial<Plotly.Config>;
 
 const getLayout = ({ isDark = true, ...restProps }: { isDark: boolean } & Partial<Plotly.Layout>) => ({
-  xaxis: { title: { text: "$k_BT/J$" }, range: [-0.05, 2.05], mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#d4d4d6" : "#323232", gridcolor: "#8888", ...restProps.xaxis },
+  xaxis: { title: { text: "$T$" }, range: [-0.05, 2.05], mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#d4d4d6" : "#323232", gridcolor: "#8888", ...restProps.xaxis },
   yaxis: { mirror: true, ticks: 'outside', showline: true, showgrid: true, zeroline: false, color: isDark ? "#d4d4d6" : "#323232", rangemode: 'nonnegative', gridcolor: "#8888", ...restProps.yaxis },
   margin: { l: 65, r: 25, b: 70, t: 50, pad: 4 },
   showlegend: false,
@@ -35,24 +35,25 @@ const traceconfig = {
     color: 'dodgerblue',
     width: 4
   },
-  hovertemplate: "(x: %{x:.2f}, y: %{y:.2f})"
+  hovertemplate: "(x: %{x:.2f}, y: %{y:.3g})"
 } satisfies Partial<Plotly.Data>;
 
 
-function Magnetizaion() {
+function AverageObs() {
   const [isDark] = useStore(store => store.isDark);
-  const [magnetization] = useStore(store => store.magnetization)
+  const [obs_data] = useStore(store => store.observable);
+  const [obs_label] = useStore(store => store.obs_label);
 
   const trace = useMemo(() => ({
-    ...magnetization,
+    ...obs_data,
     ...traceconfig
-  } satisfies Partial<Plotly.Data>), [magnetization]);
+  } satisfies Partial<Plotly.Data>), [obs_data]);
 
   const layout = useMemo(() => getLayout({
-    title: { text: "Magnetization" },
-    yaxis: { title: { text: "$\\langle M \\rangle/N$" }, range: [-0.05, 1.05] },
+    title: { text: obs_label },
+    yaxis: { title: { text: `$\\langle ${obs_label === "Magnetization" ? "M" : "E"} \\rangle/N$` }, range: obs_label === "Magnetization" ? [-0.05, 1.05] : [-2.05, 0.05] },
     isDark
-  }), [isDark]);
+  }), [isDark, obs_label]);
 
   return (
     // @ts-expect-error
@@ -65,20 +66,21 @@ function Magnetizaion() {
   )
 }
 
-function Susceptibility() {
+function VarianceObs() {
   const [isDark] = useStore(store => store.isDark);
-  const [susceptibility] = useStore(store => store.susceptibility);
+  const [var_data] = useStore(store => store.variance);
+  const [obs_label] = useStore(store => store.obs_label);
 
   const trace = useMemo(() => ({
-    ...susceptibility,
+    ...var_data,
     ...traceconfig
-  } satisfies Partial<Plotly.Data>), [susceptibility]);
+  } satisfies Partial<Plotly.Data>), [var_data]);
 
   const layout = useMemo(() => getLayout({
-    title: "Susceptibility",
-    yaxis: { title: "$\\chi$" },
+    title: { text: obs_label === "Magnetization" ? "Susceptibility" : "Specific Heat" },
+    yaxis: { title: obs_label === "Magnetization" ? "$\\chi$" : "$c$" },
     isDark
-  }), [isDark]);
+  }), [isDark, obs_label]);
 
   return (
     // @ts-expect-error
@@ -94,8 +96,8 @@ function Susceptibility() {
 
 export default function Plots() {
   return (<div>
-    <Magnetizaion />
-    <Susceptibility />
+    <AverageObs />
+    <VarianceObs />
   </div>
   )
 }

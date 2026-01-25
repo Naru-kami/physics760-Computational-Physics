@@ -97,8 +97,11 @@ body {
   background-color: #982929;
 }
 
-.step-method {
+.select-group {
   justify-self: stretch;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .app {
@@ -184,4 +187,8 @@ canvas {
     --bg: #ffffff;
     --main-color: #213547;
   }
+}
+
+.plotly .axistext {
+  display: none;
 }
