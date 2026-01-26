@@ -32,10 +32,13 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          cache-dependency-path: web_simulation/package.json
       - name: Install dependencies
-        run: npm ci
+        run: npm install
+        working-directory: web_simulation
       - name: Build
         run: npm run build
+        working-directory: web_simulation
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
