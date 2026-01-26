@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/xy-model/",
+  build: {
+    chunkSizeWarningLimit: 8192,
+  },
   plugins: [
     react({
       babel: {
