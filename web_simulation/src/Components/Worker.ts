@@ -211,7 +211,7 @@ class Data {
   }
 
   burnIn() {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 10; i++) {
       this.step();
     }
   }
@@ -262,7 +262,7 @@ class Data {
     }
 
     this.#rAF = requestAnimationFrame(currentTime => {
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 20; i++) {
         this.step()
         this.recordData();
       }
